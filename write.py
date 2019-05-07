@@ -8,10 +8,8 @@ import asyncio
 from dotenv import load_dotenv
 
 
-
 def get_args(host, port, token, username, message):
     parser = argparse.ArgumentParser(description='Undergroung Chat CLI')
-
     parser.add_argument('--host', help='Host', type=str, default=host)
     parser.add_argument('--port', help='Port', type=int, default=port)
     group = parser.add_mutually_exclusive_group()
@@ -19,7 +17,7 @@ def get_args(host, port, token, username, message):
     group.add_argument('--username', help='Username', type=str, default=username)
     parser.add_argument('--message', help='Message', type=str, default=message)
     args = parser.parse_args()
-    return args
+    return vars(args)
 
 
 async def sanitize(text):
@@ -32,7 +30,10 @@ async def register(reader, writer, username):
     writer.write('{}\n'.format(await sanitize(username)).encode())
     data = await reader.readline()
     token = json.loads(data.decode())['account_hash']
-    logging.info('Username "{}" registered with token {}.'.format(await sanitize(username), token))
+    logging.info('Username "{}" registered with token {}.'.format(
+        await sanitize(username),
+        token
+        ))
     await submit_message(reader, writer, 'I am \n the \\ new!')
 
 
@@ -61,7 +62,7 @@ async def authorize(host, port, token, username, message):
         logging.info('Invalid token but not empty username. Go to register.')
         await register(reader, writer, username)
     else:
-        logging.info('Invalid token and empty username. Check it and run again.')
+        logging.info('Invalid token and empty username. Check and run again.')
 
 
 if __name__ == '__main__':
@@ -74,7 +75,6 @@ if __name__ == '__main__':
             os.getenv('USERNAME'),
             os.getenv('MESSAGE')
             )
-    host, port, token, username, message = args.host, args.port, args.token, args.username, args.message
 
     logging.basicConfig(
         level=logging.INFO,
@@ -83,5 +83,5 @@ if __name__ == '__main__':
         )
 
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(authorize(host, port, token, username, message))
+    loop.run_until_complete(authorize(**args))
     loop.close()
