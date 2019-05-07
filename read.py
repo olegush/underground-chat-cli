@@ -8,6 +8,7 @@ from aiofile import AIOFile
 
 
 def get_args(host, port, logs):
+    '''Parses arguments from CLI.'''
     parser = argparse.ArgumentParser(description='Undergroung Chat CLI')
     parser.add_argument('--host', help='Host', type=str, default=host)
     parser.add_argument('--port', help='Port', type=int, default=port)
@@ -17,6 +18,7 @@ def get_args(host, port, logs):
 
 
 async def write_print_log(message, logs):
+    '''Async log writer.'''
     log = '[{}] {}'.format(datetime.now().strftime('%d.%m.%y %H:%M'), message)
     async with AIOFile(logs, 'a') as afp:
         await afp.write(log)
@@ -25,6 +27,7 @@ async def write_print_log(message, logs):
 
 
 async def read_chat(host, port, logs):
+    '''Async chat reader with timeouts.'''
     reader, writer = await asyncio.open_connection(host, port)
     reconnect = True
 

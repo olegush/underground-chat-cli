@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 
 
 def get_args(host, port, token, username, message):
+    '''Parses arguments from CLI.'''
     parser = argparse.ArgumentParser(description='Undergroung Chat CLI')
     parser.add_argument('--host', help='Host', type=str, default=host)
     parser.add_argument('--port', help='Port', type=int, default=port)
@@ -24,7 +25,8 @@ async def sanitize(text):
     return text.replace('\n', '').replace('\r', '')
 
 
-async def register(reader, writer, username):
+async def register(reader, writer, username, message):
+    '''Registers a new user in the chat and call submit_message().'''
     data = await reader.readline()
     logging.info(data.decode())
     writer.write('{}\n'.format(await sanitize(username)).encode())
@@ -34,10 +36,11 @@ async def register(reader, writer, username):
         await sanitize(username),
         token
         ))
-    await submit_message(reader, writer, 'I am \n the \\ new!')
+    await submit_message(reader, writer, message)
 
 
 async def submit_message(reader, writer, message):
+    '''Submit a message to the chat.'''
     data = await reader.readline()
     logging.info('Received: {}'.format(data))
     message = '{}\n\n'.format(await sanitize(message)).encode()
@@ -47,6 +50,8 @@ async def submit_message(reader, writer, message):
 
 
 async def authorize(host, port, token, username, message):
+    '''Authorizes a user and calls a submit_message() if user exists
+     or calls register().'''
     reader, writer = await asyncio.open_connection(host, port)
     data = await reader.readline()
     logging.info('Received: {}'.format(data))
@@ -60,12 +65,18 @@ async def authorize(host, port, token, username, message):
         await submit_message(reader, writer, message)
     elif username:
         logging.info('Invalid token but not empty username. Go to register.')
-        await register(reader, writer, username)
+        await register(reader, writer, username, message)
     else:
         logging.info('Invalid token and empty username. Check and run again.')
 
 
 if __name__ == '__main__':
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s,%(msecs)d %(levelname)s: %(message)s',
+        datefmt='%H:%M:%S',
+        )
 
     load_dotenv()
     args = get_args(
@@ -75,12 +86,6 @@ if __name__ == '__main__':
             os.getenv('USERNAME'),
             os.getenv('MESSAGE')
             )
-
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s,%(msecs)d %(levelname)s: %(message)s',
-        datefmt='%H:%M:%S',
-        )
 
     loop = asyncio.get_event_loop()
     loop.run_until_complete(authorize(**args))
