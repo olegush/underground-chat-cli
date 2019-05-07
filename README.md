@@ -1,7 +1,7 @@
 # Underground Chat CLI
 
-With this utility you can connect to chat via [asyncio streams] (https://docs.python.org/3/library/asyncio-stream.html), read it and save chat history to log file. Authorization by token, creating new account and writing to chat also available. The chat creates by [Devman team](https://dvmn.org/)
-especially for educational purposes.
+With the utility you can connect to chat via [asyncio streams](https://docs.python.org/3/library/asyncio-stream.html), read users messages and save chat history to log file. Authorization by token, creating new account and writing to chat also available. The explored chat was created by [Devman team](https://dvmn.org/) especially for educational purposes.
+
 
 ## How to install
 
@@ -11,7 +11,7 @@ especially for educational purposes.
 pip install -r requirements.txt
 ```
 
-2. Put all necessary parameters to **.env** file:
+2. Put all necessary parameters to **.env** file. This is default parameters for utility and you can change them by CLI arguments.
 
 ```
 HOST=host_to_connect
@@ -22,9 +22,6 @@ TOKEN=token
 USERNAME=username
 MESSAGE=your_message
 ```
-
-This is default parameters for utility and you can change them by CLI arguments.
-
 
 ## Quickstart
 
@@ -38,7 +35,7 @@ python read.py [--host] [--port] [--logs]
 python write.py [--host] [--port] [--token] [--username] [--message]
 ```
 
-For example:
+For example :
 
 ```bash
 $ python3 read.py
@@ -52,6 +49,8 @@ $ python3 read.py
 [07.05.19 16:39] Eva: Потому, что ты — код.
 
 [07.05.19 16:39] Eva: Я знаю, что такое время, но хочу проверить тебя.
+
+[07.05.19 16:39] Keen oleg: Hey chat!
 
 [07.05.19 16:39] Vlad: Ты права.
 
