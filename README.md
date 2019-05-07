@@ -1,1 +1,1 @@
-underground-chat-cli
+Underground Chat CLI
