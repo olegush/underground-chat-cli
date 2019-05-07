@@ -3,9 +3,10 @@ import argparse
 from datetime import datetime
 import logging
 import json
+import asyncio
 
 from dotenv import load_dotenv
-import asyncio
+
 
 
 def get_args(host, port, token, username, message):
@@ -20,8 +21,10 @@ def get_args(host, port, token, username, message):
     args = parser.parse_args()
     return args
 
+
 async def sanitize(text):
     return text.replace('\n', '').replace('\r', '')
+
 
 async def register(reader, writer, username):
     data = await reader.readline()

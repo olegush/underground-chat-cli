@@ -1,9 +1,9 @@
 import os
 import argparse
 from datetime import datetime
+import asyncio
 
 from dotenv import load_dotenv
-import asyncio
 from aiofile import AIOFile
 
 
@@ -11,7 +11,7 @@ def get_args(host, port, logs):
     parser = argparse.ArgumentParser(description='Undergroung Chat CLI')
     parser.add_argument('--host', help='Host', type=str, default=host)
     parser.add_argument('--port', help='Port', type=int, default=port)
-    parser.add_argument('--logs', help='Log file', type=str,default=logs)
+    parser.add_argument('--logs', help='Log file', type=str, default=logs)
     args = parser.parse_args()
     return args
 
