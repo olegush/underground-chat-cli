@@ -8,15 +8,27 @@ import asyncio
 from dotenv import load_dotenv
 
 
-def get_args(host, port, token, username, message):
+def get_args(host_default, port_default, token_default, username_default, message_default):
     '''Parses arguments from CLI.'''
     parser = argparse.ArgumentParser(description='Undergroung Chat CLI')
-    parser.add_argument('--host', help='Host', type=str, default=host)
-    parser.add_argument('--port', help='Port', type=int, default=port)
+    parser.add_argument('--host', help='Host', type=str)
+    parser.add_argument('--port', help='Port', type=int)
     group = parser.add_mutually_exclusive_group()
-    group.add_argument('--token', help='Token', type=str, default=token)
-    group.add_argument('--username', help='Username', type=str, default=username)
-    parser.add_argument('--message', help='Message', type=str, default=message)
+    group.add_argument('--token', help='Token', type=str)
+    group.add_argument('--username', help='Username', type=str)
+    parser.add_argument('--message', help='Message', type=str)
+    args = parser.parse_args()
+    if args.username:
+        token_default = None
+    if args.token:
+        username_default = None
+    parser.set_defaults(
+        host=host_default,
+        port=port_default,
+        token=token_default,
+        username=username_default,
+        message=message_default
+        )
     args = parser.parse_args()
     return vars(args)
 
@@ -40,7 +52,7 @@ async def register(reader, writer, username, message):
 
 
 async def submit_message(reader, writer, message):
-    '''Submit a message to the chat.'''
+    '''Submits a message to the chat.'''
     data = await reader.readline()
     logging.info('Received: {}'.format(data))
     message = '{}\n\n'.format(await sanitize(message)).encode()
@@ -64,10 +76,10 @@ async def authorize(host, port, token, username, message):
         logging.info('Received: {}'.format(data_json))
         await submit_message(reader, writer, message)
     elif username:
-        logging.info('Invalid token but not empty username. Go to register.')
+        logging.info('Go to register with username {}.'.format(username))
         await register(reader, writer, username, message)
     else:
-        logging.info('Invalid token and empty username. Check and run again.')
+        logging.info('Invalid token {}. Please check it.'.format(token))
 
 
 if __name__ == '__main__':

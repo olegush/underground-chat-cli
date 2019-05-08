@@ -31,6 +31,8 @@ Run **read.py** or/and **write.py** with parameters. Also you can use environmen
 python read.py [--host] [--port] [--logs]
 ```
 
+For **write.py*, you can use only *token* or *username*, not both. If you use *token*, you'll get your *username* after correct authorization. If you use *username*, its initialize new user registration and you'll get your *token* interactively.
+
 ```bash
 python write.py [--host] [--port] [--token] [--username] [--message]
 ```
