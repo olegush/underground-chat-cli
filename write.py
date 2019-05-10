@@ -33,53 +33,57 @@ def get_args(host_default, port_default, token_default, username_default, messag
     return vars(args)
 
 
-async def sanitize(text):
-    return text.replace('\n', '').replace('\r', '')
+async def authorize(host, port, token, username, message):
+    '''Authorizes a user and calls a submit_message() if user exists
+     or calls register().'''
+
+    try:
+        reader, writer = await asyncio.open_connection(host, port)
+        data = await reader.readline()
+        logging.info('Received: {}'.format(data.decode()))
+        writer.write('{}\n'.format(token).encode())
+        logging.info('Sent token: {}'.format(token))
+        data = await reader.readline()
+        data_json = json.loads(data.decode())
+
+        if data_json:
+            logging.info('Received: {}'.format(data_json))
+            await submit_message(reader, writer, message)
+        elif username:
+            logging.info('Go to register with username {}.'.format(username))
+            await register(reader, writer, username)
+            await submit_message(reader, writer, message)
+        else:
+            logging.info('Invalid token {}. Please check it.'.format(token))
+
+    finally:
+        writer.close()
 
 
-async def register(reader, writer, username, message):
+async def register(reader, writer, username):
     '''Registers a new user in the chat and call submit_message().'''
     data = await reader.readline()
     logging.info(data.decode())
-    writer.write('{}\n'.format(await sanitize(username)).encode())
+    writer.write('{}\n'.format(sanitize(username)).encode())
     data = await reader.readline()
     token = json.loads(data.decode())['account_hash']
     logging.info('Username "{}" registered with token {}.'.format(
-        await sanitize(username),
+        sanitize(username),
         token
         ))
-    await submit_message(reader, writer, message)
+
+
+def sanitize(text):
+    return text.replace('\n', '').replace('\r', '')
 
 
 async def submit_message(reader, writer, message):
     '''Submits a message to the chat.'''
     data = await reader.readline()
-    logging.info('Received: {}'.format(data))
-    message = '{}\n\n'.format(await sanitize(message)).encode()
+    logging.info('Received: {}'.format(data.decode()))
+    message = '{}\n\n'.format(sanitize(message)).encode()
     writer.write(message)
     logging.info('Sent message: {}'.format(message.decode()))
-    writer.close()
-
-
-async def authorize(host, port, token, username, message):
-    '''Authorizes a user and calls a submit_message() if user exists
-     or calls register().'''
-    reader, writer = await asyncio.open_connection(host, port)
-    data = await reader.readline()
-    logging.info('Received: {}'.format(data))
-    writer.write('{}\n'.format(token).encode())
-    logging.info('Sent token: {}'.format(token))
-    data = await reader.readline()
-    data_json = json.loads(data.decode())
-
-    if data_json:
-        logging.info('Received: {}'.format(data_json))
-        await submit_message(reader, writer, message)
-    elif username:
-        logging.info('Go to register with username {}.'.format(username))
-        await register(reader, writer, username, message)
-    else:
-        logging.info('Invalid token {}. Please check it.'.format(token))
 
 
 if __name__ == '__main__':
